@@ -19,16 +19,19 @@ export const trafficLightMachine = createMachine<
 			on: {
 				NEXT: "yellow",
 			},
+			after: { 2000: "yellow" },
 		},
 		yellow: {
 			on: {
 				NEXT: "green",
 			},
+			after: { 2000: "green" },
 		},
 		green: {
 			on: {
 				NEXT: "red",
 			},
+			after: { 2000: "red" },
 		},
 	},
 });
