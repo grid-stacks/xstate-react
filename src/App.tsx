@@ -17,7 +17,7 @@ function App() {
 					name="light"
 					id="red"
 					value="red"
-					checked={current.matches("red")}
+					checked={current.matches({ ON: "red" })}
 				/>
 				<label htmlFor="red">Red</label>
 			</div>
@@ -28,7 +28,7 @@ function App() {
 					name="light"
 					id="yellow"
 					value="yellow"
-					checked={current.matches("yellow")}
+					checked={current.matches({ ON: "yellow" })}
 				/>
 				<label htmlFor="yellow">Yellow</label>
 			</div>
@@ -39,10 +39,12 @@ function App() {
 					name="light"
 					id="green"
 					value="green"
-					checked={current.matches("green")}
+					checked={current.matches({ ON: "green" })}
 				/>
 				<label htmlFor="green">Green</label>
 			</div>
+			<button onClick={() => send("TURN_OFF")}>Off</button>
+			<button onClick={() => send("TURN_ON")}>On</button>
 			<button onClick={() => send("NEXT")}>Next</button>
 		</div>
 	);
