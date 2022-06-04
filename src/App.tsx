@@ -12,7 +12,7 @@ function App() {
 		console.log("Pizza Baking Machine ==============");
 		// console.log(pizzaBakingMachine.initialState);
 		console.log("Current value:", currentPizza.value);
-		// console.log("Current context:", currentPizza.context);
+		console.log("Current context:", currentPizza.context);
 		// console.log("Current transitions:", currentPizza.transitions);
 
 		sendPizza({ type: "TYPES_UPDATE", payload: "Chilli" }); // way 1
