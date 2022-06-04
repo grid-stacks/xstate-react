@@ -5,11 +5,13 @@ type pizzaBakingContext = {
 	type: string;
 	toppings: string;
 	address: string;
+	baking_time: number;
 };
 type pizzaBakingEvents =
 	| { type: "NEXT" }
 	| { type: "PREV" }
-	| { type: "TYPES_UPDATE"; payload: string };
+	| { type: "TYPES_UPDATE"; payload: string }
+	| { type: "BAKING_TICK" };
 type pizzaBakingStates =
 	| { value: "SET_TYPE"; context: pizzaBakingContext }
 	| { value: "SET_TOPPINGS"; context: pizzaBakingContext }
@@ -17,7 +19,7 @@ type pizzaBakingStates =
 	| { value: "START_BAKING"; context: pizzaBakingContext };
 
 export const pizzaBakingMachine =
-	/** @xstate-layout N4IgpgJg5mDOIC5QAcCWAvdBDAQlg1qgHZQB0AygKIAqA+tQJoAKlAxAHKUAa1iKA9rFQAXVPyJ8QAD0QBaAIwBWUgBYAbAGYATCoDsK7YvkAODQAZ5AGhABPRPIeljATkXHFZ45vlqVOgL7+1miYuATEZFR0jCysMZTktACqTAAiAILUlJLIgiJiEkjS9ma6qg76xroavorOpdZ2CLJaJqRqrWbOarryZhoaitWBwRjYeIQkFDT0APJMTACS7ADi5BzcvEW5QqLikjLNSqoa8s4uurpmeuY6jYhapU6uVVrG13pDKiMgIePhUyicwWyzWrCYACVKAA1HJ5PaFUCHBTKdTaPQGLRGUwWe4ITTPNxqHx1NTGLTEtQ-P5hSaRGbpVKpKHkdacHhw3YFA5yY5onT6QwmcxWWyIcwaQnueSteQGerfIK-Ma0iLTOiM5kJdaQmGc-L7IrIvmaAWY7EivFKZxS0xqMxdZwqeQaakqiZq8jUdIQug4dIAaVB4KhsO28O5Rt5qNNGKFONFTSxyhcRMepVc1SpPyI-AgcBy7oB9OizGy4a5hqRvOcZQ00o86i89bUeO6pDMHUUWl0Q3kvY0zi0btCHsBM2o8yWq3I+oRPIQVVIim79f6ihq71xYoQcrKKheunq9bqKkVo1HxfVtE1LNnFYNiOKzS0Wht1xdaidula5I6eLeeRSDONx1CHXQ1DqJQR3+OkKG9X1aH9INVjnSNq0XMoVy0NdBk3B1Eweeply7F0VE8IYh2zC9YIiNCq2fFoNw7Z0am-X8KS0PEWmcICOj6VxTh-Gps0CIA */
+	/** @xstate-layout N4IgpgJg5mDOIC5QAcCWAvdBDAQlg1qgHZQB0AygKIAqA+tQJoAKlAxAHKUAa1iKA9rFQAXVPyJ8QAD0QBaAIwBmAKykATAE41ABgBsigCzaNujYoDsygDQgAnnLXnSG7QYOG3KowYAcAXz8bNExcAmIyKjpGFlZoynJaAFUmABEAQWpKSWRBETEJJGk5eTVSA3lzPXM1I3N5fS0bewRZFR8ytSUfHQrXV10AoIxsPEISChp6AHkmJgBJdgBxcg5uXkKcoVFxSRkWpVU1XW0fbWVzA3NdX18mxF1242VlHwuNcw-5bTVBkGCRsLjSLTWYLZasJgAJUoADVsrltgVQHsFCp1Fo9IZjKYLNY7HJLM5XAY1IprpU1J1fv9QmMIpM0ikUtDyCtODx4Vt8rtimjNDp9EYTGZLHcEPUDKQnspdMoXJdDIp5NThrTwhM6IzmfEVlDYZy8jtCiiDuiBVjhbixTopRpnhpuhoST4nd8VSFRuryNQ0pC6Dg0gBpMEQ6FwjYI7nG3mHDGC7EivHNeT1W3PK6VErKI4Gd0AukUH1+2gB4NLVilsH0OYAYUDBsRPIQlO06lJym0ikMSl8ijF8g7pCulLUPi+8leBmUud+RH4EDg2VVnqBkziDajyLkSqcnUUJmuU7H5TFsncQ4slg+hjtJ1cebVq6iM3mS3IG6NW5ailKjmuKl0UkDDtAxdDFJxTHtCwlR8F0HnMB8V3pTUmRZd8Iy5T8im-XxSFebQJ2nYC2nkftylIfdnl0eodBAklEMBCIi39IMwQ-JFsNaX8rncGUgJAsD8XFQdh0pMcCMnacGLpdim1aao8MzHwiLMF5SKEs8lQ6Lo9FJJ0lEUAIAiAA */
 	createMachine<pizzaBakingContext, pizzaBakingEvents, pizzaBakingStates>(
 		{
 			context: {
@@ -25,6 +27,7 @@ export const pizzaBakingMachine =
 				type: "Pepperoni",
 				toppings: "New Toppings",
 				address: "My address",
+				baking_time: 0,
 			},
 			id: "pizzaBaking",
 			initial: "SET_TYPE",
@@ -66,12 +69,28 @@ export const pizzaBakingMachine =
 					},
 				},
 				START_BAKING: {
+					entry: "startBaking",
+					invoke: {
+						src: () => (cb) => {
+							window.setInterval(() => {
+								cb("BAKING_TICK");
+							}, 5000);
+						},
+					},
 					on: {
 						PREV: {
 							target: "SET_ADDRESS",
 						},
+						BAKING_TICK: {
+							actions: assign({
+								baking_time: (context, event) => {
+									console.log(event);
+									console.log(context);
+									return context.baking_time + 5;
+								},
+							}),
+						},
 					},
-					entry: ["startBaking"],
 				},
 			},
 		},
